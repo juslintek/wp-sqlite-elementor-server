@@ -1,13 +1,21 @@
-# Scratch-based: FrankenPHP static binary, zero OS, zero CVEs
+ARG FRANKENPHP_VERSION=latest
+
 FROM alpine:3.21 AS builder
 ARG TARGETARCH
+ARG FRANKENPHP_VERSION
+ARG PRO_ELEMENTS_VERSION=v3.35.0
 
-RUN apk add --no-cache curl unzip git ca-certificates busybox-static
+RUN apk add --no-cache curl unzip ca-certificates busybox-static
 
 RUN ARCH=$([ "$TARGETARCH" = "amd64" ] && echo "x86_64" || echo "aarch64") && \
-    curl -sL -o /frankenphp \
-      "https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-$ARCH" && \
-    chmod +x /frankenphp
+    URL="https://github.com/dunglas/frankenphp/releases" && \
+    if [ "$FRANKENPHP_VERSION" = "latest" ]; then \
+      URL="$URL/latest/download/frankenphp-linux-$ARCH"; \
+    else \
+      URL="$URL/download/$FRANKENPHP_VERSION/frankenphp-linux-$ARCH"; \
+    fi && \
+    curl -sL -o /frankenphp "$URL" && chmod +x /frankenphp && \
+    /frankenphp version
 
 RUN curl -sL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /wp-cli.phar && chmod +x /wp-cli.phar
 
@@ -17,7 +25,7 @@ RUN mkdir -p /etc/php && printf "memory_limit=512M\nerror_reporting=E_ALL&~E_DEP
 RUN mkdir -p /opt/elementor-stack && \
     curl -sL -o /tmp/s.zip "https://downloads.wordpress.org/plugin/sqlite-database-integration.latest-stable.zip" && unzip -q /tmp/s.zip -d /opt/elementor-stack/ && \
     curl -sL -o /tmp/e.zip "https://downloads.wordpress.org/plugin/elementor.latest-stable.zip" && unzip -q /tmp/e.zip -d /opt/elementor-stack/ && \
-    git clone --depth 1 https://github.com/proelements/proelements.git /opt/elementor-stack/pro-elements && rm -rf /opt/elementor-stack/pro-elements/.git && \
+    curl -sL -o /tmp/p.zip "https://github.com/proelements/proelements/releases/download/${PRO_ELEMENTS_VERSION}/pro-elements.zip" && unzip -q /tmp/p.zip -d /opt/elementor-stack/ && \
     curl -sL -o /tmp/h.zip "https://downloads.wordpress.org/theme/hello-elementor.latest-stable.zip" && unzip -q /tmp/h.zip -d /opt/elementor-stack/ && \
     rm -rf /tmp/*.zip
 

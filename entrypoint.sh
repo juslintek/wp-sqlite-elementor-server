@@ -68,6 +68,7 @@ if ! wp core is-installed 2>/dev/null; then
       --admin_email="${WP_ADMIN_EMAIL:-admin@test.local}" \
       --skip-email
 
+    wp plugin activate sqlite-database-integration 2>/dev/null || true
     wp plugin activate elementor 2>/dev/null || true
     wp plugin activate pro-elements 2>/dev/null || true
     wp theme activate hello-elementor 2>/dev/null || true
