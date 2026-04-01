@@ -145,6 +145,14 @@ if ! wp core is-installed 2>/dev/null; then
 
     wp rewrite structure '/%postname%/' 2>/dev/null || true
 
+    # Create default navigation menu
+    wp menu create "Main Menu" 2>/dev/null || true
+    wp menu item add-custom "Main Menu" "Home" "/" 2>/dev/null
+    wp menu item add-custom "Main Menu" "About" "/about" 2>/dev/null
+    wp menu item add-custom "Main Menu" "Features" "/features" 2>/dev/null
+    wp menu item add-custom "Main Menu" "Contact" "/contact" 2>/dev/null
+    wp menu location assign "Main Menu" primary 2>/dev/null || true
+
     [ -f /wp/app-password.txt ] || {
       P=$(wp user application-password create "$WP_ADMIN_USER" "mcp" --porcelain)
       [ -n "$P" ] && echo "$P" > /wp/app-password.txt
