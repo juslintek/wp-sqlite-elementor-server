@@ -5,7 +5,7 @@ ARG TARGETARCH
 ARG FRANKENPHP_VERSION
 ARG PRO_ELEMENTS_VERSION=v3.35.0
 
-RUN apk add --no-cache curl unzip ca-certificates busybox-static
+RUN apk add --no-cache curl unzip ca-certificates busybox-static git
 
 RUN ARCH=$([ "$TARGETARCH" = "amd64" ] && echo "x86_64" || echo "aarch64") && \
     URL="https://github.com/dunglas/frankenphp/releases" && \
@@ -25,7 +25,7 @@ RUN mkdir -p /etc/php && printf "memory_limit=512M\nerror_reporting=E_ALL&~E_DEP
 RUN mkdir -p /opt/elementor-stack && \
     curl -sL -o /tmp/s.zip "https://downloads.wordpress.org/plugin/sqlite-database-integration.latest-stable.zip" && unzip -q /tmp/s.zip -d /opt/elementor-stack/ && \
     curl -sL -o /tmp/e.zip "https://downloads.wordpress.org/plugin/elementor.latest-stable.zip" && unzip -q /tmp/e.zip -d /opt/elementor-stack/ && \
-    curl -sL -o /tmp/p.zip "https://github.com/proelements/proelements/releases/download/${PRO_ELEMENTS_VERSION}/pro-elements.zip" && unzip -q /tmp/p.zip -d /opt/elementor-stack/ && \
+    git clone --depth 1 -b elementor-4.0-compat https://github.com/juslintek/proelements.git /opt/elementor-stack/pro-elements && rm -rf /opt/elementor-stack/pro-elements/.git && \
     curl -sL -o /tmp/h.zip "https://downloads.wordpress.org/theme/hello-elementor.latest-stable.zip" && unzip -q /tmp/h.zip -d /opt/elementor-stack/ && \
     rm -rf /tmp/*.zip
 
