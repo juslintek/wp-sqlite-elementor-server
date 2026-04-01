@@ -34,6 +34,72 @@ add_action('init', function() {
             'auth_callback'=>function(){return current_user_can('edit_posts');}]);
 });
 add_filter('wp_is_application_passwords_available', '__return_true');
+
+// Create ProElements tables that are normally created via editor visit
+add_action('init', function() {
+    global $wpdb;
+    $wpdb->suppress_errors(true);
+    $charset = $wpdb->get_charset_collate();
+    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}e_notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id bigint(20) NOT NULL DEFAULT 0,
+        element_id varchar(60) NOT NULL DEFAULT '',
+        content longtext NOT NULL DEFAULT '',
+        author_id bigint(20) NOT NULL DEFAULT 0,
+        created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        parent_id bigint(20) NOT NULL DEFAULT 0,
+        status varchar(20) NOT NULL DEFAULT 'publish',
+        route_url varchar(2083) NOT NULL DEFAULT '',
+        route_title varchar(255) NOT NULL DEFAULT '',
+        is_resolved tinyint(1) NOT NULL DEFAULT 0,
+        resolved_by bigint(20) NOT NULL DEFAULT 0,
+        resolved_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        last_activity_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+    )");
+    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}e_submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type varchar(60) NOT NULL DEFAULT '',
+        hash_id varchar(60) NOT NULL DEFAULT '',
+        main_meta_id bigint(20) NOT NULL DEFAULT 0,
+        post_id bigint(20) NOT NULL DEFAULT 0,
+        referer varchar(500) NOT NULL DEFAULT '',
+        referer_title varchar(300) NOT NULL DEFAULT '',
+        element_id varchar(60) NOT NULL DEFAULT '',
+        form_name varchar(60) NOT NULL DEFAULT '',
+        campaign_id bigint(20) NOT NULL DEFAULT 0,
+        created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        created_at_gmt datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        updated_at_gmt datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        user_id bigint(20) NOT NULL DEFAULT 0,
+        user_ip varchar(46) NOT NULL DEFAULT '',
+        user_agent text NOT NULL DEFAULT '',
+        actions_count int(11) NOT NULL DEFAULT 0,
+        actions_succeeded_count int(11) NOT NULL DEFAULT 0,
+        status varchar(20) NOT NULL DEFAULT '',
+        is_read tinyint(1) NOT NULL DEFAULT 0
+    )");
+    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}e_submissions_values (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        submission_id bigint(20) NOT NULL DEFAULT 0,
+        key varchar(60) NOT NULL DEFAULT '',
+        value longtext NOT NULL DEFAULT ''
+    )");
+    $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}e_submissions_actions_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        submission_id bigint(20) NOT NULL DEFAULT 0,
+        action_name varchar(60) NOT NULL DEFAULT '',
+        action_label varchar(60) NOT NULL DEFAULT '',
+        status varchar(20) NOT NULL DEFAULT '',
+        log text NOT NULL DEFAULT '',
+        created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        created_at_gmt datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+        updated_at_gmt datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+    )");
+    $wpdb->suppress_errors(false);
+}, 1);
 PHP
 
 # ── 4. wp-config.php ──────────────────────────────────────────────────────────
