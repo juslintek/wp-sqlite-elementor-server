@@ -110,6 +110,7 @@ $s = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'htt
 $h = $_SERVER['HTTP_HOST'] ?? getenv('WP_DOMAIN') ?: 'localhost:8080';
 define('WP_HOME', "$s://$h"); define('WP_SITEURL', "$s://$h");
 define('DB_DIR', __DIR__.'/wp-content/database/'); define('DB_FILE', '.ht.sqlite');
+define('DB_NAME', 'wordpress'); define('DB_USER', ''); define('DB_PASSWORD', ''); define('DB_HOST', ''); define('DB_CHARSET', 'utf8'); define('DB_COLLATE', '');
 define('AUTH_KEY',getenv('WP_AUTH_KEY')?:'k1'); define('SECURE_AUTH_KEY',getenv('WP_SECURE_AUTH_KEY')?:'k2');
 define('LOGGED_IN_KEY',getenv('WP_LOGGED_IN_KEY')?:'k3'); define('NONCE_KEY',getenv('WP_NONCE_KEY')?:'k4');
 define('AUTH_SALT',getenv('WP_AUTH_SALT')?:'s1'); define('SECURE_AUTH_SALT',getenv('WP_SECURE_AUTH_SALT')?:'s2');
