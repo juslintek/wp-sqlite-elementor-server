@@ -132,19 +132,45 @@ The Alpine base image (`dunglas/frankenphp:1-php8.5-alpine`) inherits some packa
 
 FrankenPHP supports static binaries (PHP + Caddy in one file). Running on `scratch`/`distroless` would eliminate ALL OS-level CVEs. This is tracked for a future release.
 
-## Building
+## Build Variants & Args
+
+The Elementor stack is **optional** — WordPress + SQLite + FrankenPHP are always included.
+
+| Build arg | Default | Description |
+|---|---|---|
+| `WITH_ELEMENTOR` | `true` | Include the Elementor page builder |
+| `WITH_PRO_ELEMENTS` | `true` | Include Pro Elements (implies Elementor) |
+| `WITH_HELLO_ELEMENTOR` | `true` | Include + activate the hello-elementor theme |
+| `WP_VERSION` | `latest` | WordPress version (e.g. `6.9.4`) |
+| `FRANKENPHP_VERSION` | `latest` | FrankenPHP release (e.g. `v1.9.0`) |
 
 ```bash
-# Local
+# Full (default): WP + SQLite + Elementor + Pro Elements + hello-elementor
 docker build -t wp-sqlite-elementor-server .
 
-# Multi-arch + push
+# Lean: WordPress + SQLite + FrankenPHP only (no Elementor stack at all)
+docker build \
+  --build-arg WITH_ELEMENTOR=false \
+  --build-arg WITH_PRO_ELEMENTS=false \
+  --build-arg WITH_HELLO_ELEMENTOR=false \
+  -t wp-sqlite-elementor-server:no-elementor .
+
+# Elementor without Pro Elements
+docker build --build-arg WITH_PRO_ELEMENTS=false -t wp-sqlite-elementor-server:no-pro .
+
+# Multi-arch + push (after `docker login`)
 docker buildx build --platform linux/amd64,linux/arm64 \
   -t juslintek/wp-sqlite-elementor-server:latest --push .
-
-# Different PHP version
-docker build --build-arg PHP_VERSION=8.4 -t wp-sqlite-elementor-server:php8.4 .
 ```
+
+### Published tags
+
+| Tag | Contents |
+|---|---|
+| `latest`, `elementor` | Full: WP + SQLite + Elementor + Pro Elements + hello-elementor |
+| `no-elementor`, `wp-sqlite` | Lean: WP + SQLite + FrankenPHP only |
+
+CI (`.github/workflows/docker-publish.yml`) builds + pushes **both** variants (linux/amd64 + arm64) on every push to `main`. Configure repo secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` to enable publishing.
 
 ## Architecture
 

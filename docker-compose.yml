@@ -3,7 +3,12 @@ services:
     build:
       context: .
       args:
-        PHP_VERSION: "${PHP_VERSION:-8.5}"
+        # Toggle any of these to build a lean variant (e.g. all false = no Elementor stack)
+        WITH_ELEMENTOR: "${WITH_ELEMENTOR:-true}"
+        WITH_PRO_ELEMENTS: "${WITH_PRO_ELEMENTS:-true}"
+        WITH_HELLO_ELEMENTOR: "${WITH_HELLO_ELEMENTOR:-true}"
+        WP_VERSION: "${WP_VERSION:-latest}"
+        FRANKENPHP_VERSION: "${FRANKENPHP_VERSION:-latest}"
     ports:
       - "${WP_PORT:-8080}:8080"
     environment:

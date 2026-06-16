@@ -1,0 +1,55 @@
+name: Build and Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Requires repo secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
+# NOTE: actions are tag-pinned for readability; pin to 40-char commit SHAs for hardening.
+env:
+  IMAGE: juslintek/wp-sqlite-elementor-server
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Full image: WordPress + SQLite + Elementor + Pro Elements + hello-elementor
+          - variant: full
+            build_args: ""
+            tags: |
+              juslintek/wp-sqlite-elementor-server:latest
+              juslintek/wp-sqlite-elementor-server:elementor
+          # Lean image: WordPress + SQLite + FrankenPHP only (no Elementor stack)
+          - variant: no-elementor
+            build_args: |
+              WITH_ELEMENTOR=false
+              WITH_PRO_ELEMENTS=false
+              WITH_HELLO_ELEMENTOR=false
+            tags: |
+              juslintek/wp-sqlite-elementor-server:no-elementor
+              juslintek/wp-sqlite-elementor-server:wp-sqlite
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          build-args: ${{ matrix.build_args }}
+          tags: ${{ matrix.tags }}
+          push: true
+          provenance: false
+          cache-from: type=gha,scope=${{ matrix.variant }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.variant }}
